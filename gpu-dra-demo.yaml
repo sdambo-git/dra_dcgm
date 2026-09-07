@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gpu-dra-demo
+  namespace: nvidia-gpu-operator
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: gpu-dra-demo
+  namespace: nvidia-gpu-operator
+spec:
+  spec:
+    devices:
+      requests:
+      - name: gpu
+        exactly:
+          deviceClassName: gpu.nvidia.com
+          allocationMode: ExactCount
+          count: 1
+          adminAccess: true
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-dra-demo
+  namespace: nvidia-gpu-operator
+  labels:
+    app: gpu-dra-demo
+spec:
+  serviceAccountName: gpu-dra-demo
+  restartPolicy: Always
+  containers:
+  - name: nbody
+    image: nvcr.io/nvidia/k8s/cuda-sample:nbody-cuda11.7.1
+    command:
+    - sh
+    - -c
+    - |
+      set -eu
+      echo "GPU devices:"
+      nvidia-smi -L || true
+      BIN=""
+      for p in /cuda-samples/nbody /tmp/sample nbody; do
+        if [ -x "$p" ]; then BIN="$p"; break; fi
+        if command -v "$p" >/dev/null 2>&1; then BIN="$p"; break; fi
+      done
+      echo "using binary: ${BIN:-none}"
+      [ -n "$BIN" ]
+      while true; do
+        "$BIN" -benchmark -numbodies=1048576 || "$BIN" -benchmark
+      done
+    resources:
+      claims:
+      - name: gpu
+  resourceClaims:
+  - name: gpu
+    resourceClaimTemplateName: gpu-dra-demo
+  tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule

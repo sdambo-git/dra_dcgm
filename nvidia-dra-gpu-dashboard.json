@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 14,
+  "title": "NVIDIA DRA GPU Dashboard",
+  "uid": "nvidia-dra-gpu",
+  "version": 2,
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "hideControls": false,
+  "links": [],
+  "refresh": "30s",
+  "style": "dark",
+  "tags": ["nvidia", "dcgm", "dra", "gpu"],
+  "timezone": "UTC",
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h"]
+  },
+  "annotations": { "list": [] },
+  "templating": {
+    "list": [
+      {
+        "current": { "text": "default", "value": "default" },
+        "hide": 0,
+        "label": "Data source",
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" },
+        "datasource": "$datasource",
+        "hide": 0,
+        "includeAll": true,
+        "label": "DRA claim",
+        "multi": false,
+        "name": "claim",
+        "options": [],
+        "query": "label_values(DCGM_FI_DEV_GPU_UTIL, dra_claim_name)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "rows": [
+    {
+      "collapse": false,
+      "height": "250px",
+      "showTitle": true,
+      "title": "Utilization",
+      "titleSize": "h6",
+      "panels": [
+        {
+          "id": 1,
+          "title": "GPU Utilization by DRA claim (%)",
+          "type": "graph",
+          "span": 12,
+          "datasource": "$datasource",
+          "fill": 1,
+          "lines": true,
+          "linewidth": 2,
+          "legend": { "show": true, "alignAsTable": true, "avg": true, "current": true, "max": true, "values": true, "rightSide": true },
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_GPU_UTIL{dra_claim_name=~\"$claim\"}",
+              "format": "time_series",
+              "legendFormat": "{{pod}} | {{dra_claim_name}} | {{modelName}}"
+            }
+          ],
+          "xaxis": { "mode": "time", "show": true, "values": [] },
+          "yaxes": [
+            { "format": "percent", "min": 0, "max": 100, "show": true },
+            { "format": "short", "show": false }
+          ]
+        }
+      ]
+    },
+    {
+      "collapse": false,
+      "height": "250px",
+      "showTitle": true,
+      "title": "Memory",
+      "titleSize": "h6",
+      "panels": [
+        {
+          "id": 2,
+          "title": "GPU Framebuffer used by DRA claim (MiB)",
+          "type": "graph",
+          "span": 6,
+          "datasource": "$datasource",
+          "fill": 1,
+          "lines": true,
+          "linewidth": 2,
+          "legend": { "show": true, "alignAsTable": true, "current": true, "max": true, "values": true },
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_FB_USED{dra_claim_name=~\"$claim\"}",
+              "format": "time_series",
+              "legendFormat": "{{pod}} | {{dra_claim_name}}"
+            }
+          ],
+          "xaxis": { "mode": "time", "show": true, "values": [] },
+          "yaxes": [
+            { "format": "short", "min": 0, "show": true },
+            { "format": "short", "show": false }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "GPU Framebuffer free by DRA claim (MiB)",
+          "type": "graph",
+          "span": 6,
+          "datasource": "$datasource",
+          "fill": 1,
+          "lines": true,
+          "linewidth": 2,
+          "legend": { "show": true, "alignAsTable": true, "current": true, "values": true },
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_FB_FREE{dra_claim_name=~\"$claim\"}",
+              "format": "time_series",
+              "legendFormat": "{{pod}} | {{dra_claim_name}}"
+            }
+          ],
+          "xaxis": { "mode": "time", "show": true, "values": [] },
+          "yaxes": [
+            { "format": "short", "min": 0, "show": true },
+            { "format": "short", "show": false }
+          ]
+        }
+      ]
+    },
+    {
+      "collapse": false,
+      "height": "250px",
+      "showTitle": true,
+      "title": "Temperature and power",
+      "titleSize": "h6",
+      "panels": [
+        {
+          "id": 4,
+          "title": "GPU Temperature by DRA claim (C)",
+          "type": "graph",
+          "span": 6,
+          "datasource": "$datasource",
+          "fill": 1,
+          "lines": true,
+          "linewidth": 2,
+          "legend": { "show": true, "alignAsTable": true, "current": true, "max": true, "values": true },
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_GPU_TEMP{dra_claim_name=~\"$claim\"}",
+              "format": "time_series",
+              "legendFormat": "{{pod}} | {{dra_claim_name}}"
+            }
+          ],
+          "xaxis": { "mode": "time", "show": true, "values": [] },
+          "yaxes": [
+            { "format": "celsius", "show": true },
+            { "format": "short", "show": false }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "GPU Power by DRA claim (W)",
+          "type": "graph",
+          "span": 6,
+          "datasource": "$datasource",
+          "fill": 1,
+          "lines": true,
+          "linewidth": 2,
+          "legend": { "show": true, "alignAsTable": true, "current": true, "max": true, "values": true },
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_POWER_USAGE{dra_claim_name=~\"$claim\"}",
+              "format": "time_series",
+              "legendFormat": "{{pod}} | {{dra_claim_name}}"
+            }
+          ],
+          "xaxis": { "mode": "time", "show": true, "values": [] },
+          "yaxes": [
+            { "format": "watt", "show": true },
+            { "format": "short", "show": false }
+          ]
+        }
+      ]
+    }
+  ]
+}
