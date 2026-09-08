@@ -213,8 +213,13 @@ oc exec -n openshift-monitoring prometheus-k8s-0 -c prometheus -- \
   wget -qO- 'http://localhost:9090/api/v1/query?query=count(DCGM_FI_DEV_GPU_UTIL)'
 ```
 
-OpenShift console: **Administrator → Observe → Targets**, job  
-`serviceMonitor/nvidia-gpu-operator/nvidia-dcgm-exporter-dra/0` should be **Up**.
+In the OpenShift console, go to **Administrator → Observe → Metrics** and run:
+
+```promql
+up{namespace="nvidia-gpu-operator"}
+```
+
+The DCGM Exporter target should return `1`. Then check **Administrator → Observe → Targets** and confirm monitor `nvidia-dcgm-exporter-dra` is **Up**. The console may show a generated target identifier ending in `/0`; that suffix is not necessarily the value of the Prometheus `job` label.
 
 Useful labels on DCGM series:
 
